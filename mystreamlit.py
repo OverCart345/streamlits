@@ -112,15 +112,18 @@ def page_ml_prediction():
         st.subheader("Введите данные для предсказания:")
 
         input_data = {}
-        feature_names_float = ['distance_from_home','distance_from_last_transaction','ratio_to_median_purchase_price']
-        feature_names_int = ['repeat_retailer','used_chip','used_pin_number','online_order']
+        feature_names = {
+            'float': ['Расстояние от дома (км)', 'Расстояние от последней транзакции (км)', 'Отношение к медианной цене покупки'],
+            'int': ['Повторный заказ', 'Использование чипа', 'Использование_пин-кода', 'Онлайн_заказ']
+        }
 
-        for feature in feature_names_float:
-            input_data[feature] = st.number_input(f"{feature}", min_value=0.0, max_value=100000.0, value=0.0)
-
-        for feature in feature_names_int:
-            input_data[feature] = st.number_input(f"{feature}", min_value=0, max_value=1, value=0)
-
+        for dtype, features in feature_names.items():
+            for feature in features:
+                if dtype == 'float':
+                    input_data[feature] = st.number_input(f"{feature}", min_value=0.0, max_value=100000.0, value=0.0)
+                else:  # dtype == 'int'
+                    selected_option = st.selectbox(f"{feature}", ['да', 'нет'], index=1)
+                    input_data[feature] = 1 if selected_option == 'да' else 0
         if st.button('Сделать предсказание'):
             model_catboost, model_kmeans, model_knn, model_random_tree, model_stacking, model_neiro = deserialisation()
 
