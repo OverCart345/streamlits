@@ -113,25 +113,33 @@ def page_ml_prediction():
 
         input_data = {}
         feature_names = {
-            'float': ['Расстояние от дома (км)', 'Расстояние от последней транзакции (км)', 'Отношение к медианной цене покупки'],
-            'int': ['Повторный заказ', 'Использование чипа', 'Использование_пин-кода', 'Онлайн_заказ']
+            'float': {'Расстояние от дома (км)': 'distance_from_home', 
+                  'Расстояние от последней транзакции (км)': 'distance_from_last_transaction', 
+                  'Отношение к медианной цене покупки': 'ratio_to_median_purchase_price'},
+            'int': {'Повторный заказ': 'repeat_retailer', 
+                'Использование чипа': 'used_chip', 
+                'Использование_пин-кода': 'used_pin_number', 
+                'Онлайн_заказ': 'online_order'}
         }
 
         for dtype, features in feature_names.items():
-            for feature in features:
+            for feature_rus, feature_eng in features.items():
                 if dtype == 'float':
-                    input_data[feature] = st.number_input(f"{feature}", min_value=0.0, max_value=100000.0, value=0.0)
+                    input_data[feature_eng] = st.number_input(f"{feature_rus}", min_value=0.0, max_value=100000.0, value=0.0)
                 else:  # dtype == 'int'
-                    selected_option = st.selectbox(f"{feature}", ['да', 'нет'], index=1)
-                    input_data[feature] = 1 if selected_option == 'да' else 0
+                    selected_option = st.selectbox(f"{feature_rus}", ['да', 'нет'], index=1)
+                    input_data[feature_eng] = 1 if selected_option == 'да' else 0
         if st.button('Сделать предсказание'):
             model_catboost, model_kmeans, model_knn, model_random_tree, model_stacking, model_neiro = deserialisation()
 
-            prediction_catboost = model_catboost.predict(X_test)
-            prediction_knn = model_knn.predict(X_test)
-            prediction_random_tree = model_random_tree.predict(X_test)
-            prediction_stacking = model_stacking.predict(X_test)
-            prediction_neiro = (model_neiro.predict(X_test) > 0.5).astype(int)
+
+            input_df = pd.DataFrame([input_data])
+
+            prediction_catboost = model_catboost.predict(input_df)
+            prediction_knn = model_knn.predict(input_df)
+            prediction_random_tree = model_random_tree.predict(input_df)
+            prediction_stacking = model_stacking.predict(input_df)
+            prediction_neiro = (model_neiro.predict(input_df) > 0.5).astype(int)
 
             st.success(f"Результат предсказания CatBoost: {prediction_catboost[0]}")
             st.success(f"Результат предсказания KNN: {prediction_knn[0]}")
