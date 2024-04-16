@@ -1,8 +1,4 @@
 streamlit
-matplotlib
-seaborn
 pandas
 scikit-learn
-catboost
-tensorflow
 pickle5
